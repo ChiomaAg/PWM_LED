@@ -1,18 +1,18 @@
-# STM32 PWM LED Brightness Control
+# STM32 PWM LED Fading with TIM1
 
-This project demonstrates how to control LED brightness using PWM (Pulse Width Modulation) with TIM1 on an STM32 microcontroller. The LED brightness alternates between two levels (75% and 25%) every second.
+This project demonstrates how to fade an LED smoothly using PWM (Pulse Width Modulation) and a `for` loop on an STM32 microcontroller. The LED gradually brightens from off to full brightness, then dims back down — creating a breathing effect.
 
 ##  Project Overview
 
-- **MCU Series**: STM32 (tested with STM32L4, configurable for other STM32 families)
+- **MCU Series**: STM32 (tested with STM32L4, configurable for others)
 - **Timer Used**: TIM1, Channel 1
 - **PWM Frequency**: 1 kHz
-- **Duty Cycles**: 75% and 25%, alternating every second
+- **Duty Cycle Range**: 0% to 100%, updated incrementally
 - **Clock Source**: MSI @ 4 MHz
 - **Prescaler**: 3
-- **Period**: 999 (for 1 kHz PWM cycle)
+- **Period**: 999 (1 ms PWM period)
 
-##  Peripherals Configuration
+## Peripherals Configuration
 
 ### Clock
 - System Clock: 4 MHz using MSI (RCC_MSIRANGE_6)
@@ -35,10 +35,22 @@ This project demonstrates how to control LED brightness using PWM (Pulse Width M
 
 ## 📋 Code Behavior
 
-- The LED brightness is controlled by varying the duty cycle.
-- In the main loop, the duty cycle is updated every second:
-  ```c
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 750); // 75% duty
-  HAL_Delay(1000);
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 250); // 25% duty
-  HAL_Delay(1000);
+- The LED fades **up** and **down** by adjusting the PWM duty cycle gradually in a loop.
+  
+```c
+while (1)
+{
+  // Fade in
+  for (int i = 0; i <= 999; i += 10)
+  {
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, i);
+    HAL_Delay(10);
+  }
+
+  // Fade out
+  for (int i = 999; i >= 0; i -= 10)
+  {
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, i);
+    HAL_Delay(10);
+  }
+}
